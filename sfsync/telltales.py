@@ -76,7 +76,7 @@ def from_neptune_json_dump() -> int:
 #     "airbagFailure": false
 # }
 def main():
-    print(bin(from_neptune_json_dump()))
+    print(from_neptune_json_dump())
 
 
 if __name__ == '__main__':
