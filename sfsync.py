@@ -54,6 +54,9 @@ def _telltales_from_json_dump() -> int:
     bitmask = 0
 
     for key, value in content.items():
+        if key not in _TELLTALE_JSON_KEY_TO_BIT_POSITION:
+            continue
+
         bit_position = _TELLTALE_JSON_KEY_TO_BIT_POSITION[key]
         mask = 1 << bit_position.value
 
