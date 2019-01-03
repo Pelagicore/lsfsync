@@ -44,7 +44,9 @@ _TELLTALE_JSON_PATH = '/tmp/lastTelltalesState.json'
 def _telltales_from_json_dump() -> int:
     try:
         with open(_TELLTALE_JSON_PATH) as file:
-            content = json.load(file)
+            # Should be just "content = json.load(file)" but file can be corrupt (extra
+            # trailing }:s). Not protected against garbage other than } chars...
+            content = json.loads(file.read().strip().strip('}') + '}')
     except BaseException:
         return 0
 
