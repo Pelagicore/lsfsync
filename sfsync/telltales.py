@@ -3,8 +3,6 @@
 import enum
 import json
 
-from typing import Dict
-
 
 # Values copied from "TellTalePos" enum in some distant source file, in a repo
 # far far away (received in mail, no idea where it is defined).
@@ -23,7 +21,7 @@ class BitPosition(enum.Enum):
     TIRE_PRESSURE = 11
 
 
-_JSON_KEY_TO_BIT_POSITION: Dict[str, BitPosition] = {
+_JSON_KEY_TO_BIT_POSITION = {
     'lowBeamHeadlight': BitPosition.LOW_BEAM,
     'highBeamHeadlight': BitPosition.HIGH_BEAM,
     'fogLight': BitPosition.FOG_LIGHTS,
