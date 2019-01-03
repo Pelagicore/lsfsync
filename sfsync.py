@@ -2,11 +2,13 @@
 
 import enum
 import json
+import subprocess
+import time
 
 
 # Values copied from "TellTalePos" enum in some distant source file, in a repo
 # far far away (received in mail, no idea where it is defined).
-class BitPosition(enum.Enum):
+class TelltaleBitPosition(enum.Enum):
     ABS_FAULT = 0
     AIR_BAG = 1
     BRAKE_FAULT = 2
@@ -21,26 +23,26 @@ class BitPosition(enum.Enum):
     TIRE_PRESSURE = 11
 
 
-_JSON_KEY_TO_BIT_POSITION = {
-    'lowBeamHeadlight': BitPosition.LOW_BEAM,
-    'highBeamHeadlight': BitPosition.HIGH_BEAM,
-    'fogLight': BitPosition.FOG_LIGHTS,
-    'stabilityControl': BitPosition.STABILITY_CONTROL,
-    'seatBeltFasten': BitPosition.SEAT_BELT,
-    'leftTurn': BitPosition.LEFT_TURN,
-    'rightTurn': BitPosition.RIGHT_TURN,
-    'absFailure': BitPosition.ABS_FAULT,
-    'parkBrake': BitPosition.PARKING_BREAK,
-    'tyrePressureLow': BitPosition.TIRE_PRESSURE,
-    'brakeFailure': BitPosition.BRAKE_FAULT,
-    'airbagFailure': BitPosition.AIR_BAG
+_TELLTALE_JSON_KEY_TO_BIT_POSITION = {
+    'lowBeamHeadlight': TelltaleBitPosition.LOW_BEAM,
+    'highBeamHeadlight': TelltaleBitPosition.HIGH_BEAM,
+    'fogLight': TelltaleBitPosition.FOG_LIGHTS,
+    'stabilityControl': TelltaleBitPosition.STABILITY_CONTROL,
+    'seatBeltFasten': TelltaleBitPosition.SEAT_BELT,
+    'leftTurn': TelltaleBitPosition.LEFT_TURN,
+    'rightTurn': TelltaleBitPosition.RIGHT_TURN,
+    'absFailure': TelltaleBitPosition.ABS_FAULT,
+    'parkBrake': TelltaleBitPosition.PARKING_BREAK,
+    'tyrePressureLow': TelltaleBitPosition.TIRE_PRESSURE,
+    'brakeFailure': TelltaleBitPosition.BRAKE_FAULT,
+    'airbagFailure': TelltaleBitPosition.AIR_BAG
 }
 
-_NEPTUNE_JSON_PATH = '/tmp/lastTelltalesState.json'
+_TELLTALE_JSON_PATH = '/tmp/lastTelltalesState.json'
 
 
-def from_neptune_json_dump() -> int:
-    with open(_NEPTUNE_JSON_PATH) as file:
+def _telltales_from_json_dump() -> int:
+    with open(_TELLTALE_JSON_PATH) as file:
         content = json.load(file)
 
     if not isinstance(content, dict):
@@ -49,7 +51,7 @@ def from_neptune_json_dump() -> int:
     bitmask = 0
 
     for key, value in content.items():
-        bit_position = _JSON_KEY_TO_BIT_POSITION[key]
+        bit_position = _TELLTALE_JSON_KEY_TO_BIT_POSITION[key]
         mask = 1 << bit_position.value
 
         if value:
@@ -60,8 +62,25 @@ def from_neptune_json_dump() -> int:
     return bitmask
 
 
+def _pci_debug(command):
+    subprocess.run(['/home/root/pci_debug', '-s', '01:00.0', '-b', '0', '-c', command])
+
+
+def _write_telltales(value):
+    _pci_debug('C 0x2404 ' + hex(value))
+
+
+def _write_ui_keep_alive(value):
+    _pci_debug('C 0x2400 ' + hex(value))
+
+
 def main():
-    print(from_neptune_json_dump())
+    while True:
+        _write_telltales(_telltales_from_json_dump())
+        _write_ui_keep_alive(9)
+        time.sleep(0.4)
+        _write_ui_keep_alive(10)
+        time.sleep(0.4)
 
 
 if __name__ == '__main__':
