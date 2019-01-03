@@ -1,0 +1,14 @@
+{
+    "lowBeamHeadlight": true,
+    "highBeamHeadlight": false,
+    "fogLight": false,
+    "stabilityControl": false,
+    "seatBeltFasten": false,
+    "leftTurn": false,
+    "rightTurn": false,
+    "absFailure": false,
+    "parkBrake": false,
+    "tyrePressureLow": false,
+    "brakeFailure": false,
+    "airbagFailure": false
+}

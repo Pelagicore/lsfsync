@@ -60,21 +60,6 @@ def from_neptune_json_dump() -> int:
     return bitmask
 
 
-# Example JSON copied from target (write to _NEPTINE_JSON_PATH to test):
-# {
-#     "lowBeamHeadlight": true,
-#     "highBeamHeadlight": false,
-#     "fogLight": false,
-#     "stabilityControl": false,
-#     "seatBeltFasten": false,
-#     "leftTurn": false,
-#     "rightTurn": false,
-#     "absFailure": false,
-#     "parkBrake": false,
-#     "tyrePressureLow": false,
-#     "brakeFailure": false,
-#     "airbagFailure": false
-# }
 def main():
     print(from_neptune_json_dump())
 
