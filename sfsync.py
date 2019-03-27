@@ -71,7 +71,7 @@ def _telltales_from_json_dump() -> int:
 
 
 def _pci_debug(command):
-    subprocess.run(['/home/root/pci_debug', '-s', '01:00.0', '-b', '0', '-c', command])
+    subprocess.run(['pci_debug', '-s', '01:00.0', '-b', '0', '-c', command])
 
 
 def _write_telltales(value):
