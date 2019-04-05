@@ -4,6 +4,7 @@ import enum
 import json
 import subprocess
 import time
+import sys
 
 
 # Values copied from "TellTalePos" enum in some distant source file, in a repo
@@ -70,24 +71,33 @@ def _telltales_from_json_dump() -> int:
     return bitmask
 
 
-def _pci_debug(command):
-    subprocess.run(['pci_debug', '-s', '01:00.0', '-b', '0', '-c', command])
+def _pci_debug(command, target_bdf):
+    subprocess.run(['pci_debug', '-s {}'.format(target_bdf), '-b', '0', '-c', command])
 
 
-def _write_telltales(value):
-    _pci_debug('C 0x2404 ' + hex(value))
+def _write_telltales(value, target_bdf):
+    _pci_debug('C 0x2404 ' + hex(value), target_bdf)
 
 
-def _write_ui_keep_alive(value):
-    _pci_debug('C 0x2400 ' + hex(value))
+def _write_ui_keep_alive(value, target_bdf):
+    _pci_debug('C 0x2400 ' + hex(value), target_bdf)
 
 
 def main():
+    pci_vendor = "8086"
+    pci_device = "fffd"
+    lspci_result = subprocess.run(["lspci", "-d {}:{}".format(pci_vendor, pci_device)], stdout=subprocess.PIPE)
+    target_bdf = lspci_result.stdout.decode().split(" ")[0]
+
+    if (not ":" in target_bdf) or (not "." in target_bdf):
+        print("Could not find any PCI device with vendor:device = {}:{} aborting!".format(pci_vendor, pci_device))
+        sys.exit(1)
+
     while True:
-        _write_telltales(_telltales_from_json_dump())
-        _write_ui_keep_alive(9)
+        _write_telltales(_telltales_from_json_dump(), target_bdf)
+        _write_ui_keep_alive(9, target_bdf)
         time.sleep(0.4)
-        _write_ui_keep_alive(10)
+        _write_ui_keep_alive(10, target_bdf)
         time.sleep(0.4)
 
 
